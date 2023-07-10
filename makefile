@@ -17,6 +17,8 @@ loader_src = $(dir_src)/boot/loader.asm
 
 kernel_bin = $(dir_bin)/kernel.bin
 kernel_srcs = $(dir_src)/main.asm \
+	$(wildcard $(dir_src)/interrupt/*.asm) \
+	$(wildcard $(dir_src)/device/*.asm) \
 	$(wildcard $(dir_src)/libarys/*.asm) \
 	$(wildcard $(dir_src)/libarys/print/*.asm)
 

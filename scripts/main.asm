@@ -2,9 +2,11 @@
 %include "include/stdlib.inc"
 
 [bits 32]
-
+extern idt_init
 
 func _start
+    call idt_init
+
     set_cursor_ex(0, 0)
     uint32_t my_var, 0x12abcdef
     printf(\
@@ -16,5 +18,7 @@ func _start
         my_var,\
         @my_var\
     )
+    
+    sti
     jmp $
 func_end
