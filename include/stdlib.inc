@@ -1,5 +1,5 @@
-%ifndef STDINC
-%define STDINC
+%ifndef STDLIB_INC
+%define STDLIB_INC
 
 %include "include/builtin.inc"
 

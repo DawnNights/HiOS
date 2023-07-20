@@ -1,6 +1,9 @@
 %ifndef PAGE_INC
 %define PAGE_INC
 
+; 一页的大小
+PAGE_SIZE equ 4096
+
 ; 在二级页表中, 页目录表的物理地址
 ; 数量为1M的页表项被分割成了数量为1K个页目录项, 每个页目录项指向一个包含数量为1K个页表项的页表
 PAGE_DIR_PHYS_ADDR equ 0x100000

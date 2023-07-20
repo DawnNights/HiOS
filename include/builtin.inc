@@ -1,6 +1,8 @@
 %ifndef BUILTIN_INC
 %define BUILTIN_INC
 
+%define DQ_MARK "
+
 ;-------------------------------------------------------------------------------
 ; 宏名称: func
 ; 描述: 开始一个函数并设置堆栈帧 
@@ -15,6 +17,7 @@
 
     %define __FUNCNAME__ %1
     %define __FUNCEND__ %1 %+ _end
+    %define __FUNCSTR__ DQ_MARK %+ %1 %+ DQ_MARK
 
     section .text
     global __FUNCNAME__
@@ -76,7 +79,11 @@
 
 %macro return_32 1
     %assign __RETVALUE__ 1
-    mov eax, dword %1
+
+    %ifnidni %1, eax
+        mov eax, dword %1
+    %endif
+    
     jmp __FUNCEND__
 %endmacro
 
@@ -93,7 +100,7 @@
     %define uint16_t 2
     %define uint32_t 4
 
-    %assign __STACK_VAR__ __STACK_VAR__ - %1
+    %assign __STACK_VAR__ __STACK_VAR__ - (%1)
     sub esp, dword %1
     %xdefine @%2 ebp %+ __STACK_VAR__
     %xdefine %2 [@%2]
@@ -102,6 +109,47 @@
     %undef uint16_t
     %undef uint32_t
 %endmacro
+
+;-------------------------------------------------------------------------------
+; 宏名称: uint8_t / uint16_t / uint32_t / ...
+; 描述: 申请一个 1 / 2 / 4 字节大小的变量并设置默认值
+; 输入: 
+;   - %1: 变量名称
+;   - %2: 变量默认值
+; 修改的寄存器: esp
+;-------------------------------------------------------------------------------
+%macro uint8_t 2
+    %assign __STACK_VAR__ __STACK_VAR__ - 1
+    %xdefine @%1 ebp %+ __STACK_VAR__
+    %xdefine %1 [@%1]
+    push_8 %2
+%endmacro
+
+%macro uint16_t 2
+    %assign __STACK_VAR__ __STACK_VAR__ - 2
+    %xdefine @%1 ebp %+ __STACK_VAR__
+    %xdefine %1 [@%1]
+    push_16 %2
+%endmacro
+
+%macro uint32_t 2
+    %assign __STACK_VAR__ __STACK_VAR__ - 4
+    %xdefine @%1 ebp %+ __STACK_VAR__
+    %xdefine %1 [@%1]
+    push_32 %2
+%endmacro
+
+%define int8_t  uint8_t
+%define int16_t uint16_t
+%define int32_t uint32_t
+
+%define bool_t    uint8_t
+%define char_t    uint8_t
+%define pointer_t uint32_t
+
+%define NULL  0 ; 空值
+%define TRUE  1 ; 布尔值-真
+%define FALSE 0 ; 布尔值-假
 
 ;-------------------------------------------------------------------------------
 ; 宏名称: arg
@@ -231,43 +279,6 @@
     %endif
 
 %endmacro
-
-;-------------------------------------------------------------------------------
-; 宏名称: uint8_t / uint16_t / uint32_t / ...
-; 描述: 申请一个 1 / 2 / 4 字节大小的变量并设置默认值
-; 输入: 
-;   - %1: 变量名称
-;   - %2: 变量默认值
-; 修改的寄存器: esp
-;-------------------------------------------------------------------------------
-%macro uint8_t 2
-    %assign __STACK_VAR__ __STACK_VAR__ - 1
-    %xdefine @%1 ebp %+ __STACK_VAR__
-    %xdefine %1 [@%1]
-    push_8 %2
-%endmacro
-
-%macro uint16_t 2
-    %assign __STACK_VAR__ __STACK_VAR__ - 2
-    %xdefine @%1 ebp %+ __STACK_VAR__
-    %xdefine %1 [@%1]
-    push_16 %2
-%endmacro
-
-%macro uint32_t 2
-    %assign __STACK_VAR__ __STACK_VAR__ - 4
-    %xdefine @%1 ebp %+ __STACK_VAR__
-    %xdefine %1 [@%1]
-    push_32 %2
-%endmacro
-
-%define int8_t  uint8_t
-%define int16_t uint16_t
-%define int32_t uint32_t
-
-%define bool_t    uint8_t
-%define char_t    uint8_t
-%define pointer_t uint32_t
 
 ;-------------------------------------------------------------------------------
 ; 描述: 方便进行库函数的声明、定义等所使用的宏

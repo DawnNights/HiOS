@@ -42,7 +42,7 @@ func_lib put_hex
         more_nine:
             add dl, 'A' - 10
 
-            cmp is_upper, byte 0
+            cmp is_upper, byte FALSE
             jne hex_fmt_next
 
             add dl, 'a' - 'A'

@@ -255,7 +255,7 @@ func exception_init
     DefineIntrName 12, "#SS Stack Fault Exception"
     DefineIntrName 13, "#GP General Protection Exception"
     DefineIntrName 14, "#PF Page-Fault Exception"
-    ; DefineIntrName 15 第15项是intel保留项，未使用
+    ; DefineIntrName 15 第15项是intel保留项, 未使用
     DefineIntrName 16, "#MF x87 FPU Floating-Point Error"
     DefineIntrName 17, "#AC Alignment Check Exception"
     DefineIntrName 18, "#MC Machine-Check Exception"

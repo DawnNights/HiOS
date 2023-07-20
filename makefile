@@ -20,7 +20,8 @@ kernel_srcs = $(dir_src)/main.asm \
 	$(wildcard $(dir_src)/interrupt/*.asm) \
 	$(wildcard $(dir_src)/device/*.asm) \
 	$(wildcard $(dir_src)/libarys/*.asm) \
-	$(wildcard $(dir_src)/libarys/print/*.asm)
+	$(wildcard $(dir_src)/libarys/print/*.asm) \
+	$(wildcard $(dir_src)/libarys/memory/*.asm)
 
 # ---------- 编译执行流程 ----------
 

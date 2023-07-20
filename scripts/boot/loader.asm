@@ -3,10 +3,7 @@
 %include "include/system/primary.inc"
 
 section .text vstart=0x500
-    jmp detect_by_e801
-
-    ; 物理内存容量
-    total_mem_bytes dd 0
+    jmp enter_protected_mode
 
     ; GDT 中不可用的第 0 个描述符
     null_desc: istruc SegDescriptor
@@ -60,25 +57,6 @@ section .text vstart=0x500
         at Limit,    dw GDT_LIMIT
         at BaseAddr, dd null_desc
     iend
-
-; 通过 0x15 中断子功能 0xE801 获取内存, 上限为4GB
-; 获取物理内存成功则跳转进入保护模式
-detect_by_e801:
-    mov ax, 0xE801
-    int 0x15
-    jc detect_failed
-
-    ; (ax + bx * 64 + 1024) * 1024
-    shl ebx, 6  ; 乘以 64
-    add ebx, eax
-    add ebx, 1024
-    shl ebx, 10 ; 乘以 1024
-
-    mov [total_mem_bytes], ebx
-    jmp enter_protected_mode
-
-detect_failed:
-    jmp $
 
 ; 从16位实模式切换到32位保护模式 
 enter_protected_mode:
