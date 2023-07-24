@@ -1,53 +1,80 @@
-# ----------定义全局变量 ----------
+# ---------- 写入虚拟硬盘 ----------
+sector_bin = builds/boot/sector.bin
+loader_bin = builds/boot/loader.bin
+kernel_bin = builds/kernel/kernel.bin
 
-dir_src = ./scripts
-dir_bin = ./builds/binary
-dir_obj = ./builds/object
-virtual_disk = ./builds/virtual_disk
-
-# ---------- 定义引导相关 ----------
-
-sector_bin = $(dir_bin)/sector.bin
-sector_src = $(dir_src)/boot/sector.asm
-
-loader_bin = $(dir_bin)/loader.bin
-loader_src = $(dir_src)/boot/loader.asm
-
-# ---------- 定义内核相关 ----------
-
-kernel_bin = $(dir_bin)/kernel.bin
-kernel_srcs = $(dir_src)/main.asm \
-	$(wildcard $(dir_src)/interrupt/*.asm) \
-	$(wildcard $(dir_src)/device/*.asm) \
-	$(wildcard $(dir_src)/libarys/*.asm) \
-	$(wildcard $(dir_src)/libarys/print/*.asm) \
-	$(wildcard $(dir_src)/libarys/memory/*.asm)
-
-# ---------- 编译执行流程 ----------
-
-# 写入虚拟硬盘
-all: $(sector_bin) $(loader_bin) $(kernel_bin)
+virtual_disk = builds/virtual_disk
+$(virtual_disk): $(sector_bin) $(loader_bin) $(kernel_bin)
 	dd if=$(sector_bin) of=$(virtual_disk) bs=512 count=1 conv=notrunc
 	dd if=$(loader_bin) of=$(virtual_disk) bs=512 count=4 seek=1 conv=notrunc
 	dd if=$(kernel_bin) of=$(virtual_disk) bs=512 count=200 seek=5 conv=notrunc
 
-# 编译主引导程序
+# ---------- 编译引导相关 ----------
+sector_src = scripts/boot/sector.asm
+loader_src = scripts/boot/loader.asm
+
 $(sector_bin): $(sector_src)
 	nasm -f bin -o $(sector_bin) $(sector_src)
 
-# 编译内核加载器
 $(loader_bin): $(loader_src)
 	nasm -f bin -o $(loader_bin) $(loader_src)
 
-# 编译内核及依赖
-kernel_objs = $(foreach src, $(kernel_srcs), $(dir_obj)/$(notdir $(patsubst %/,%, $(dir $(src))))_$(basename $(notdir $(src))).obj)
-
-$(kernel_objs): $(kernel_srcs)
-	$(foreach src,$(kernel_srcs), \
-		{ \
-			nasm -f elf32 $(src) -o $(dir_obj)/$(notdir $(patsubst %/,%, $(dir $(src))))_$(basename $(notdir $(src))).obj; \
-		}; \
-	)
+# ---------- 编译内核相关 ----------
+kernel_srcs = $(shell find scripts/kernel -type f -name '*.asm')
+kernel_objs = $(patsubst scripts/kernel/%.asm,builds/kernel/%.o,$(kernel_srcs))
 
 $(kernel_bin): $(kernel_objs)
 	ld -m elf_i386 -Od -Ttext 0xc0000d00 --oformat binary -o $(kernel_bin) $(kernel_objs)
+
+# 内核入口
+in_dir = scripts/kernel
+out_dir = builds/kernel
+
+target = $(patsubst $(in_dir)/%.asm,$(out_dir)/%.o,$(wildcard $(in_dir)/*.asm))
+$(target): $(out_dir)/%.o: $(in_dir)/%.asm
+	nasm -f elf32 -w-all $< -o $@
+
+# 中断相关
+in_dir = scripts/kernel/interrupt
+out_dir = builds/kernel/interrupt
+
+
+target = $(patsubst $(in_dir)/%.asm,$(out_dir)/%.o,$(wildcard $(in_dir)/*.asm))
+$(target): $(out_dir)/%.o: $(in_dir)/%.asm
+	nasm -f elf32 -w-all $< -o $@
+
+# 内存相关
+in_dir = scripts/kernel/memory
+out_dir = builds/kernel/memory
+
+
+target = $(patsubst $(in_dir)/%.asm,$(out_dir)/%.o,$(wildcard $(in_dir)/*.asm))
+$(target): $(out_dir)/%.o: $(in_dir)/%.asm
+	nasm -f elf32 -w-all $< -o $@
+
+# 打印相关
+in_dir = scripts/kernel/print
+out_dir = builds/kernel/print
+
+
+target = $(patsubst $(in_dir)/%.asm,$(out_dir)/%.o,$(wildcard $(in_dir)/*.asm))
+$(target): $(out_dir)/%.o: $(in_dir)/%.asm
+	nasm -f elf32 -w-all $< -o $@
+
+# 线程相关
+in_dir = scripts/kernel/thread
+out_dir = builds/kernel/thread
+
+
+target = $(patsubst $(in_dir)/%.asm,$(out_dir)/%.o,$(wildcard $(in_dir)/*.asm))
+$(target): $(out_dir)/%.o: $(in_dir)/%.asm
+	nasm -f elf32 -w-all $< -o $@
+
+# 其它相关
+in_dir = scripts/kernel/utils
+out_dir = builds/kernel/utils
+
+
+target = $(patsubst $(in_dir)/%.asm,$(out_dir)/%.o,$(wildcard $(in_dir)/*.asm))
+$(target): $(out_dir)/%.o: $(in_dir)/%.asm
+	nasm -f elf32 -w-all $< -o $@

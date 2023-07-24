@@ -45,4 +45,22 @@ extern_lib memcpy
 
 %define memcpy(target, source, length) memcpy target, source, length
 
+;-------------------------------------------------------------------------------
+; 宏原型: pointer_t strcpy(pointer_t target, pointer_t source)
+;-------------------------------------------------------------------------------
+extern_lib strcpy
+
+%macro strcpy 2
+    ; 4 字节大小的 source 参数入栈
+    push_32 %2
+    
+    ; 4 字节大小的 target 参数入栈
+    push_32 %1
+
+    call_lib strcpy
+    add esp, 4 + 4
+%endmacro
+
+%define strcpy(target, source) strcpy target, source
+
 %endif

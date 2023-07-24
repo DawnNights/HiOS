@@ -139,17 +139,17 @@
     push_32 %2
 %endmacro
 
-%define int8_t  uint8_t
-%define int16_t uint16_t
-%define int32_t uint32_t
+%xdefine int8_t  uint8_t
+%xdefine int16_t uint16_t
+%xdefine int32_t uint32_t
 
-%define bool_t    uint8_t
-%define char_t    uint8_t
-%define pointer_t uint32_t
+%xdefine bool_t    uint8_t
+%xdefine char_t    uint8_t
+%xdefine pointer_t uint32_t
 
-%define NULL  0 ; 空值
-%define TRUE  1 ; 布尔值-真
-%define FALSE 0 ; 布尔值-假
+%xdefine NULL  0 ; 空值
+%xdefine TRUE  1 ; 布尔值-真
+%xdefine FALSE 0 ; 布尔值-假
 
 ;-------------------------------------------------------------------------------
 ; 宏名称: arg

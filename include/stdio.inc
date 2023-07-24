@@ -112,4 +112,35 @@ extern_lib printf
 %define printf(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) printf format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8
 %define printf(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9) printf format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9
 
+;-------------------------------------------------------------------------------
+; 宏原型: void panic(pointer_t error)
+;-------------------------------------------------------------------------------
+extern_lib panic
+
+%macro panic 1
+    ; 关闭中断防止干扰
+    cli
+
+    ; 异常信息字符串入栈
+    push_32 %1
+
+    ; 函数名称字符串入栈
+    push_32 __FUNCSTR__
+
+    ; 行号入栈
+    push_32 __LINE__
+
+    ; 文件名字符串入栈
+    push_32 __FILE__
+
+    ; 调用函数并恢复栈顶
+    call_lib panic
+    add esp, 4 * 4
+
+    ; 将程序停止于此
+    jmp $
+%endmacro
+
+%define panic(error) panic error
+
 %endif

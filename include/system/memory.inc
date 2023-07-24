@@ -151,4 +151,23 @@ extern_lib get_kernel_pages
 
 %define get_kernel_pages(pcount) get_kernel_pages pcount
 
+;-------------------------------------------------------------------------------
+; 宏原型: void free_kernel_pages(pointer_t vaddr, uint32_t pcount)
+;-------------------------------------------------------------------------------
+extern_lib free_kernel_pages
+
+%macro free_kernel_pages 2
+    ; 4 字节大小的 pcount 参数入栈
+    push_32 %2
+
+    ; 4 字节大小的 vaddr 参数入栈
+    push_32 %1
+
+    ; 调用函数并恢复栈顶
+    call_lib free_kernel_pages
+    add esp, dword 4 + 4
+%endmacro
+
+%define free_kernel_pages(vaddr, pcount) free_kernel_pages vaddr, pcount
+
 %endif

@@ -2,7 +2,7 @@
 %define PAGE_INC
 
 ; 一页的大小
-PAGE_SIZE equ 4096
+PAGE_SIZE equ 0x1000
 
 ; 在二级页表中, 页目录表的物理地址
 ; 数量为1M的页表项被分割成了数量为1K个页目录项, 每个页目录项指向一个包含数量为1K个页表项的页表
@@ -10,7 +10,7 @@ PAGE_DIR_PHYS_ADDR equ 0x100000
 
 ; 在二级页表中, 第一个页表的物理地址
 ; 因为每个页目录项占4字节, 共计1K个页目录项, 所以页表的地址就在页目录表的4K字节后
-PAGE_TABLE_PHYS_ADDR equ PAGE_DIR_PHYS_ADDR + 0x1000
+PAGE_TABLE_PHYS_ADDR equ PAGE_DIR_PHYS_ADDR + PAGE_SIZE
 
 ; 页目录项/页表项中的P位表示存在位
 ; 若为1, 则表示该页存在于物理内存中, 反之则不存在于物理内存中

@@ -66,12 +66,4 @@ SELECTOR_DATA equ (0x02 << 3) | TI_GDT | RPL_0
 SELECTOR_STACK equ SELECTOR_DATA
 SELECTOR_VIDEO equ (0x03 << 3) | TI_GDT | RPL_0
 
-;-------------------------------------------------------------------------------
-; 描述: 定义了可编程中断控制器8259A的相关端口常量
-;-------------------------------------------------------------------------------
-PIC_M_CTRL equ 0x20
-PIC_M_DATA equ 0x21
-PIC_S_CTRL equ 0xA0
-PIC_S_DATA equ 0xA1
-
 %endif
