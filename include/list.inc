@@ -117,4 +117,39 @@ extern_lib list_pop
 
 %define list_pop(list) list_pop list
 
+;-------------------------------------------------------------------------------
+; 宏原型: bool_t list_exist(pointer_t list, pointer_t elem)
+;-------------------------------------------------------------------------------
+extern_lib list_exist
+
+%macro list_exist 2
+    ; 4 字节大小的 elem 参数入栈
+    push_32 %2
+
+    ; 4 字节大小的 list 参数入栈
+    push_32 %1
+
+    ; 调用函数并恢复栈顶
+    call_lib list_exist
+    add esp, dword 4 + 4
+%endmacro
+
+%define list_exist(list, elem) list_exist list, elem
+
+;-------------------------------------------------------------------------------
+; 宏原型: bool_t list_is_empty(pointer_t list)
+;-------------------------------------------------------------------------------
+extern_lib list_is_empty
+
+%macro list_is_empty 1
+    ; 4 字节大小的 list 参数入栈
+    push_32 %1
+
+    ; 调用函数并恢复栈顶
+    call_lib list_is_empty
+    add esp, dword 4
+%endmacro
+
+%define list_is_empty(list) list_is_empty list
+
 %endif

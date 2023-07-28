@@ -1,5 +1,5 @@
 %include "include/string.inc"
-%include "include/system/memory.inc"
+%include "include/memory.inc"
 
 [bits 32]
 section .text

@@ -1,9 +1,18 @@
 %include "include/stdio.inc"
 
-[bits 32]
-extern intr_disable
-extern intr_recover
+%macro intr_disable 0
+    pushfd
+    pop edx
+    cli
+%endmacro
 
+%macro intr_recover 0
+    bt edx, 9
+    jnc __FUNCEND__
+    sti
+%endmacro
+
+[bits 32]
 ;-------------------------------------------------------------------------------
 ; 函数名: printf
 ; 描述: 格式化输出函数
@@ -13,8 +22,7 @@ extern intr_recover
 ; 返回值: 所打印的字符总数
 ;-------------------------------------------------------------------------------
 func_lib printf
-    call intr_disable
-
+    intr_disable
     ; 用于记录所打印的字符总数
     uint32_t put_count, 0
 
@@ -142,7 +150,7 @@ func_lib printf
         inc esi
         cmp [esi], byte 0
         jne put_str_loop
-
-    call intr_recover
+    
+    intr_recover
     return_32 put_count
 func_end

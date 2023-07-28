@@ -4,9 +4,6 @@
 
 [bits 32]
 section .data
-    ; 该数值用于记录中断的状态
-    intr_old_status dd 0
-
     ; 用于存储 33 个 4 字节大小的中断入口函数地址
     extern intr_entry_table
     
@@ -81,49 +78,6 @@ func idt_desc_init
 func_end
 
 ;-------------------------------------------------------------------------------
-; 函数名: intr_enable/disable/recover
-; 描述: 中断操作函数(开启/关闭/恢复)
-; 参数: 无
-; 返回值: 无
-;-------------------------------------------------------------------------------
-global intr_enable
-global intr_disable
-global intr_recover
-
-intr_enable:
-    call save_old_status
-    jmp sti_and_ret
-
-intr_disable:
-    call save_old_status
-    jmp cli_and_ret
-
-intr_recover:
-    cmp [intr_old_status], dword 0
-    je cli_and_ret
-    jmp sti_and_ret
-    
-sti_and_ret:
-    sti
-    ret
-
-cli_and_ret:
-    cli
-    ret
-
-save_old_status:
-    push edx
-    
-    pushfd
-    pop edx
-    and edx, 0x200
-    mov [intr_old_status], edx
-    
-    pop edx
-
-    ret
-
-;-------------------------------------------------------------------------------
 ; 函数名: idt_init
 ; 描述: 初始化中断相关并加载IDT表
 ; 参数: 无
@@ -140,7 +94,4 @@ func idt_init
     ; 使用lidt指令加载IDT表
     call idt_desc_init
     lidt [idt_ptr]
-
-    ; 开启中断
-    call intr_enable
 func_end

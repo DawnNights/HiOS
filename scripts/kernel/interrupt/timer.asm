@@ -1,5 +1,5 @@
 %include "include/stdio.inc"
-%include "include/system/thread.inc"
+%include "include/thread.inc"
 
 ; 定义我们想要的中断发生频率, 100HZ
 IRQ0_FREQUENCY equ 100

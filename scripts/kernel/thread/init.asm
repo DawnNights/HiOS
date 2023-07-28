@@ -2,12 +2,14 @@
 %include "include/string.inc"
 %include "include/stdio.inc"
 
-%include "include/system/memory.inc"
-%include "include/system/thread.inc"
+%include "include/memory.inc"
+%include "include/thread.inc"
 
-%define SHOW_THREAD_INFO
+; %define SHOW_THREAD_INFO
 
 section .data
+    global thread_sign_list
+    
     head  dq 0
     tail  dq 0
 
@@ -15,8 +17,6 @@ section .data
         at List.Head,   dd head
         at List.Tail,   dd tail
     iend
-    
-    reserved_stack_addr dd 0
 
 [bits 32]
 section .text
@@ -151,9 +151,9 @@ func_lib thread_start
     list_append(thread_sign_list, esi)
 
     %ifdef SHOW_THREAD_INFO
-        put_str("\n--------------------------------\n")
+        printf("\n--------------------------------\n")
         printf("Start Thread: %s\nMalloc Page Addr: %p", name, ebx)
-        put_str("\n--------------------------------\n")
+        printf("\n--------------------------------\n")
     %endif
 
     return_32 ebx
@@ -223,9 +223,7 @@ thread_schedule:
         pop fs
         pop es
         pop ds
-
-        sti ; 打开中断使得线程可以继续调度
-        iret
+        iret    ; 自动恢复标志位并跳转执行
 
     ; 表示调度线程被阻塞, 直接进入下一个线程
     when_thread_block:
@@ -236,14 +234,20 @@ thread_schedule:
         %ifdef SHOW_THREAD_INFO
             lea edx, [ebx + ThreadControl.Name]
 
-            put_str("\n--------------------------------\n")
+            printf("\n--------------------------------\n")
             printf("Exit Thread: %s\nFree Page Addr: %p", edx, ebx)
-            put_str("\n--------------------------------\n")
+            printf("\n--------------------------------\n")
         %endif
 
-        mov esp, [reserved_stack_addr]
-        free_kernel_pages(ebx, 1)
-        jmp enter_next_thread
+        ; 因为释放内存会导致当前栈不可用, 所以我们先切换为下一个线程的栈
+        mov edx, ebx
+
+        list_pop(thread_sign_list)
+        lea ebx, [eax - ThreadControl.SignElem]
+        mov esp, [ebx + ThreadControl.StackTop]
+
+        free_kernel_pages(edx, 1)
+        jmp thread_schedule
 
 ;-------------------------------------------------------------------------------
 ; 函数名: thread_init
@@ -257,13 +261,8 @@ thread_init:
     ; 获取主函数执行地址
     pop edi
 
-    ; 申请一页内存当作预留空间
+    ; 申请一页内存当作主线程空间
     get_kernel_pages(1)
-    add eax, PAGE_SIZE  ; 栈地址由高到低偏移
-    mov [reserved_stack_addr], eax
-
-    ; 初始化主函数控制模块
-    call get_running_thread
     mov ebx, eax
     thread_ctrl_init(ebx, "_start", 30)
 
@@ -271,9 +270,8 @@ thread_init:
     mov [ebx + ThreadControl.Status], dword TASK_RUNNING
     mov esp, [ebx + ThreadControl.StackTop]
 
-
     ; 压入中断返回内容
-    pushfd
+    push dword 0x286
     push dword cs
     push dword edi
 
