@@ -89,3 +89,34 @@ func_lib strcpy
 
     s_cpy_ret: return_32 target
 func_end
+
+;-------------------------------------------------------------------------------
+; 函数名: strlen
+; 描述: 计算字符串的长度
+; 参数:
+;   - %1: 目标字符串地址
+; 返回值: 字符串长度
+;-------------------------------------------------------------------------------
+func_lib strlen
+    ; 取消宏定义防止变量名冲突
+    %undef str
+
+    ; 声明函数传参
+    arg pointer_t, str
+
+    ; 声明函数变量
+    uint32_t length, 0
+
+    ; 以下是函数主体
+    mov esi, str
+
+    s_len_loop:
+        cmp [esi], byte 0
+        je s_len_ret
+
+        inc esi
+        inc dword length
+        jmp s_len_loop
+    
+    s_len_ret: return_32 length
+func_end

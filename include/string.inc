@@ -63,4 +63,20 @@ extern_lib strcpy
 
 %define strcpy(target, source) strcpy target, source
 
+;-------------------------------------------------------------------------------
+; 宏原型: uint32_t strlen(pointer_t str)
+;-------------------------------------------------------------------------------
+extern_lib strlen
+
+%macro strlen 1
+    ; 4 字节大小的 str 参数入栈
+    push_32 %1
+
+    ; 调用函数并恢复栈顶
+    call_lib strlen
+    add esp, dword 4
+%endmacro
+
+%define strlen(str) strlen str
+
 %endif

@@ -6,6 +6,7 @@
 ;-------------------------------------------------------------------------------
 ; 宏原型: void put_char(char_t ascii)
 ;-------------------------------------------------------------------------------
+extern char_attr
 extern_lib put_char
 
 %macro put_char 1
@@ -138,6 +139,7 @@ extern_lib panic
     add esp, 4 * 4
 
     ; 将程序停止于此
+    cli
     jmp $
 %endmacro
 

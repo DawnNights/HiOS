@@ -2,18 +2,6 @@
 %include "include/sync.inc"
 %include "include/thread.inc"
 
-%macro intr_disable 0
-    pushfd
-    pop edi
-    cli
-%endmacro
-
-%macro intr_recover 0
-    bt edi, 9
-    jnc __FUNCEND__
-    sti
-%endmacro
-
 ;-------------------------------------------------------------------------------
 ; 函数名: lock_init
 ; 描述: 初始化互斥锁
@@ -105,7 +93,7 @@ func_end
 ;   - %1: 参数1
 ; 返回值: 无
 ;-------------------------------------------------------------------------------
-extern thread_sign_list
+extern thread_ready_list
 
 func_lib lock_release
     ; 取消宏定义防止变量名冲突
@@ -168,7 +156,7 @@ func_lib lock_release
         mov [esi + MutexLock.Holder], ebx
 
         mov [ebx + ThreadControl.Status], dword TASK_READY
-        list_push(thread_sign_list, eax)
+        list_push(thread_ready_list, eax)
         jmp thread_schedule
 
     release_end: intr_recover

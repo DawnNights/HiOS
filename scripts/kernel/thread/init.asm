@@ -8,12 +8,12 @@
 ; %define SHOW_THREAD_INFO
 
 section .data
-    global thread_sign_list
+    global thread_ready_list
     
     head  dq 0
     tail  dq 0
 
-    thread_sign_list: istruc List
+    thread_ready_list: istruc List
         at List.Head,   dd head
         at List.Tail,   dd tail
     iend
@@ -73,7 +73,7 @@ func_lib thread_ctrl_init
     ; 线程没有自己的地址空间, 故设置为 NULL
     mov [ebx + ThreadControl.PageDir], dword NULL
 
-    ; 本操作系统的线程不会太大，向下偏移一页大小内存作栈足够
+    ; 本操作系统的线程不会太大, 向下偏移一页大小内存作栈足够
     mov [ebx + ThreadControl.StackTop], ebx
     add [ebx + ThreadControl.StackTop], dword PAGE_SIZE
 
@@ -148,7 +148,7 @@ func_lib thread_start
     
     ; 将线程任务置入调度表中
     lea esi, [ebx + ThreadControl.SignElem]
-    list_append(thread_sign_list, esi)
+    list_append(thread_ready_list, esi)
 
     %ifdef SHOW_THREAD_INFO
         printf("\n--------------------------------\n")
@@ -195,11 +195,17 @@ thread_schedule:
 
     ; 进入下一个线程
     enter_next_thread:
-        list_pop(thread_sign_list)
+        list_is_empty(thread_ready_list)
+        cmp eax, TRUE
+        je ready_thread_empty
+
+        list_pop(thread_ready_list)
         lea ebx, [eax - ThreadControl.SignElem]
         mov esp, [ebx + ThreadControl.StackTop]
         jmp thread_schedule
-        
+
+    ready_thread_empty:
+        panic("thread_ready_list is empty")
 
     ; 表示调度线程还未执行完毕, 只是单次执行周期到达上限
     ; 使用刷新该线程的执行周期, 更改为就绪态重新放入调度表后再进入下一个线程
@@ -210,7 +216,7 @@ thread_schedule:
         mov [ebx + ThreadControl.Status], dword TASK_READY
         
         lea edx, [ebx + ThreadControl.SignElem]
-        list_append(thread_sign_list, edx)
+        list_append(thread_ready_list, edx)
         jmp enter_next_thread
 
     ; 表示调度线程已经准备就绪, 跳转到执行函数运行
@@ -242,7 +248,7 @@ thread_schedule:
         ; 因为释放内存会导致当前栈不可用, 所以我们先切换为下一个线程的栈
         mov edx, ebx
 
-        list_pop(thread_sign_list)
+        list_pop(thread_ready_list)
         lea ebx, [eax - ThreadControl.SignElem]
         mov esp, [ebx + ThreadControl.StackTop]
 
@@ -292,5 +298,60 @@ thread_init:
     ; 线程调度
     mov [ebx + ThreadControl.StackTop], esp
 
-    list_clear(thread_sign_list)
+    list_clear(thread_ready_list)
     call thread_schedule
+
+;-------------------------------------------------------------------------------
+; 函数名: thread_block
+; 描述: 将当前线程阻塞并标志运行状态
+; 参数:
+;   - %1: 线程状态
+; 返回值: 无
+;-------------------------------------------------------------------------------
+func_lib thread_block
+    ; 取消宏定义防止变量名冲突
+    %undef stat
+
+    ; 声明函数传参
+    arg pointer_t, stat
+
+    ; 以下是函数主体
+    intr_disable
+
+    mov edx, stat
+    call get_running_thread
+    mov [eax+ThreadControl.Status], edx
+    call thread_schedule
+
+    intr_recover
+func_end
+
+;-------------------------------------------------------------------------------
+; 函数名: thread_unblock
+; 描述: 将指定线程解除阻塞
+; 参数:
+;   - %1: 线程结构指针
+; 返回值: 无
+;-------------------------------------------------------------------------------
+func_lib thread_unblock
+    ; 取消宏定义防止变量名冲突
+    %undef pthread
+    
+    ; 声明函数传参
+    arg pointer_t, pthread
+
+    ; 以下是函数主体
+    intr_disable
+
+    list_exist(thread_ready_list, [ebx+ThreadControl.SignElem])
+    cmp eax, FALSE
+    je unblock_continue
+    panic("thread_unblock: blocked thread in thread_ready_list")
+    
+    unblock_continue:
+        mov ebx, pthread
+        list_push(thread_ready_list, [ebx+ThreadControl.SignElem])
+        mov [ebx+ThreadControl.Status], dword TASK_READY
+
+    intr_recover
+func_end

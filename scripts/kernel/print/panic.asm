@@ -1,4 +1,5 @@
 %include "include/stdio.inc"
+%include "include/string.inc"
 
 [bits 32]
 ;-------------------------------------------------------------------------------
@@ -17,11 +18,21 @@ func_lib panic
     arg pointer_t, name
     arg pointer_t, error
     
+    mov [char_attr], byte 00001100b
     printf(\
-        "\n\nAn error occurred while system was running\n  File %s, line %d, in <%s>\n%s",\
+        "\n\n!! ERROR TRACE !!\n| File: %s\n| Line: %d\n| Function: <%s>\n\n  %s\n\n",\
         file,\
         line,\
         name,\
         error\
     )
+
+    strlen(error)
+    lea ecx, [eax+4]
+
+    under_loop:
+        put_char("^")
+        loop under_loop
+
+    mov [char_attr], byte 00001111b
 func_end

@@ -79,4 +79,36 @@ extern_lib thread_start
 
 %define thread_start(function, name, priority, func_arg) thread_start function, name, priority, func_arg
 
+;-------------------------------------------------------------------------------
+; 宏原型: void thread_block(uint32_t stat)
+;-------------------------------------------------------------------------------
+extern_lib thread_block
+
+%macro thread_block 1
+    ; 4 字节大小的 stat 参数入栈
+    push_32 %1
+
+    ; 调用函数并恢复栈顶
+    call_lib thread_block
+    add esp, dword 4
+%endmacro
+
+%define thread_block(stat) thread_block stat
+
+;-------------------------------------------------------------------------------
+; 宏原型: void thread_unblock(pointer_t pthread)
+;-------------------------------------------------------------------------------
+extern_lib thread_unblock
+
+%macro thread_unblock 1
+    ; 4 字节大小的 pthread 参数入栈
+    push_32 %1
+
+    ; 调用函数并恢复栈顶
+    call_lib thread_unblock
+    add esp, dword 4
+%endmacro
+
+%define thread_unblock(pthread) thread_unblock pthread
+
 %endif

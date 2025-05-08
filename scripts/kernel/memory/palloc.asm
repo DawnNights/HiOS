@@ -148,7 +148,7 @@ func_lib page_table_add
     mov esi, eax
 
     ; 执行*pte,会访问到空的pde。所以确保pde创建完成后才能执行*pte
-    ; 先在页目录内判断目录项的P位，若为1,则表示该表已存在
+    ; 先在页目录内判断目录项的P位, 若为1,则表示该表已存在
     mov eax, [edi]
     and eax, 0x00000001
     cmp eax, 1

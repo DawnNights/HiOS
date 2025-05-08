@@ -1,17 +1,5 @@
 %include "include/stdio.inc"
 
-%macro intr_disable 0
-    pushfd
-    pop edx
-    cli
-%endmacro
-
-%macro intr_recover 0
-    bt edx, 9
-    jnc __FUNCEND__
-    sti
-%endmacro
-
 [bits 32]
 ;-------------------------------------------------------------------------------
 ; 函数名: printf

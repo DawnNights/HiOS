@@ -59,6 +59,23 @@ func_lib set_cursor
 func_end
 
 ;-------------------------------------------------------------------------------
+; 函数名: get_cursor_ex
+; 描述: 获取光标当前坐标
+; 参数: 无
+; 返回值: 光标的纵横位置
+;-------------------------------------------------------------------------------
+func_lib get_cursor_ex
+    call_lib get_cursor
+    mov dl, 80
+    div dl
+
+    mov bh, ah
+    mov ah, al
+    mov al, bh
+    return_16 ax
+func_end
+
+;-------------------------------------------------------------------------------
 ; 函数名: set_cursor_ex
 ; 描述: 设置光标当前坐标
 ; 参数: 
@@ -69,6 +86,18 @@ func_end
 func_lib set_cursor_ex
     arg uint8_t, row
     arg uint8_t, col
+
+    cmp row, byte 0
+    jl __FUNCEND__
+
+    cmp col, byte 0
+    jl __FUNCEND__
+
+    cmp row, byte 24
+    jg __FUNCEND__
+
+    cmp col, byte 79
+    jg __FUNCEND__
 
     movzx ax, byte row
     mov dl, 80
