@@ -1,3 +1,6 @@
+ld = i686-elf-ld
+clear_cmd = del /S /Q .\*.o .\*.bin 2>NUL || (exit 0)
+
 # ---------- 写入虚拟硬盘 ----------
 sector_bin = builds/boot/sector.bin
 loader_bin = builds/boot/loader.bin
@@ -20,11 +23,15 @@ $(loader_bin): $(loader_src)
 	nasm -f bin -o $(loader_bin) $(loader_src)
 
 # ---------- 编译内核相关 ----------
-kernel_srcs = $(shell find scripts/kernel -type f -name '*.asm')
+kernel_srcs := $(wildcard scripts/kernel/*.asm scripts/kernel/**/*.asm)
 kernel_objs = $(patsubst scripts/kernel/%.asm,builds/kernel/%.o,$(kernel_srcs))
 
 $(kernel_bin): $(kernel_objs)
-	ld -m elf_i386 -Od -Ttext 0xc0000d00 --oformat binary -o $(kernel_bin) $(kernel_objs)
+	$(ld) -m elf_i386 -Od -Ttext 0xc0000d00 --oformat binary -o $(kernel_bin) $(kernel_objs)
+
+# ---------- 清理相关文件 ----------
+clear:
+	@$(clear_cmd)
 
 # 内核入口
 in_dir = scripts/kernel
