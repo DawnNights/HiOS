@@ -2,22 +2,22 @@ ld = i686-elf-ld
 clear_cmd = del /S /Q .\*.o .\*.bin 2>NUL || (exit 0)
 
 # ---------- 写入虚拟硬盘 ----------
-sector_bin = builds/boot/sector.bin
+mbr_bin = builds/boot/mbr.bin
 loader_bin = builds/boot/loader.bin
 kernel_bin = builds/kernel/kernel.bin
 
 virtual_disk = builds/virtual_disk
-$(virtual_disk): $(sector_bin) $(loader_bin) $(kernel_bin)
-	dd if=$(sector_bin) of=$(virtual_disk) bs=512 count=1 conv=notrunc
+$(virtual_disk): $(mbr_bin) $(loader_bin) $(kernel_bin)
+	dd if=$(mbr_bin) of=$(virtual_disk) bs=512 count=1 conv=notrunc
 	dd if=$(loader_bin) of=$(virtual_disk) bs=512 count=4 seek=1 conv=notrunc
 	dd if=$(kernel_bin) of=$(virtual_disk) bs=512 count=200 seek=5 conv=notrunc
 
 # ---------- 编译引导相关 ----------
-sector_src = scripts/boot/sector.asm
+mbr_src = scripts/boot/mbr.asm
 loader_src = scripts/boot/loader.asm
 
-$(sector_bin): $(sector_src)
-	nasm -f bin -o $(sector_bin) $(sector_src)
+$(mbr_bin): $(mbr_src)
+	nasm -f bin -o $(mbr_bin) $(mbr_src)
 
 $(loader_bin): $(loader_src)
 	nasm -f bin -o $(loader_bin) $(loader_src)
@@ -80,6 +80,15 @@ $(target): $(out_dir)/%.o: $(in_dir)/%.asm
 # 其它相关
 in_dir = scripts/kernel/utils
 out_dir = builds/kernel/utils
+
+
+target = $(patsubst $(in_dir)/%.asm,$(out_dir)/%.o,$(wildcard $(in_dir)/*.asm))
+$(target): $(out_dir)/%.o: $(in_dir)/%.asm
+	nasm -f elf32 -w-all $< -o $@
+
+# 用户进程
+in_dir = scripts/kernel/userprog
+out_dir = builds/kernel/userprog
 
 
 target = $(patsubst $(in_dir)/%.asm,$(out_dir)/%.o,$(wildcard $(in_dir)/*.asm))

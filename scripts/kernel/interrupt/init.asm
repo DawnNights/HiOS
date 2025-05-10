@@ -225,7 +225,7 @@ func make_idt_desc
     shr eax, 16
     mov word [ebx + FuncHigh], ax
 
-    mov word [ebx + Selector], SELECTOR_CODE
+    mov word [ebx + Selector], SELECTOR_K_CODE
 
     mov byte [ebx + ArgCount],  0
 

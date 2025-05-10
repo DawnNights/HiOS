@@ -2,6 +2,7 @@
 
 REM 检查 virtual_disk 是否存在，若不存在则生成
 if not exist "builds\virtual_disk" (
+    make clear
     bximage -hd -mode="flat" -size=60 -q builds\virtual_disk
 )
 

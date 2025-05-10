@@ -74,20 +74,20 @@ enter_protected_mode:
     mov cr0, eax
     
     ; 刷新流水线, 使其按照 32 位指令译码
-    jmp dword SELECTOR_CODE:protected_mode_main
+    jmp dword SELECTOR_K_CODE:protected_mode_main
 
 [bits 32]
 protected_mode_main:
-    mov ax, SELECTOR_VIDEO
+    mov ax, SELECTOR_K_VIDEO
     mov es, ax
-    mov ax, SELECTOR_DATA
+    mov ax, SELECTOR_K_DATA
     mov ss, ax
 
     jmp open_page_mode
 
 ; 设置页表并初始化内存位图
 setup_page:
-    mov ax, SELECTOR_DATA
+    mov ax, SELECTOR_K_DATA
     mov ds, ax
 
     ; 清空页目录占用的空间

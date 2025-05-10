@@ -87,8 +87,8 @@ TI_GDT equ 00b
 TI_LDT equ 10b
 
 ; 段描述符的选择子
-SELECTOR_CODE equ (0x01 << 3) | TI_GDT | RPL_0
-SELECTOR_DATA equ (0x02 << 3) | TI_GDT | RPL_0
-SELECTOR_VIDEO equ (0x03 << 3) | TI_GDT | RPL_0
+SELECTOR_K_CODE equ (0x01 << 3) | TI_GDT | RPL_0
+SELECTOR_K_DATA equ (0x02 << 3) | TI_GDT | RPL_0
+SELECTOR_K_VIDEO equ (0x03 << 3) | TI_GDT | RPL_0
 
 %endif

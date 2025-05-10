@@ -11,6 +11,7 @@
 extern idt_init
 extern mem_init
 extern thread_init
+extern tss_init
 extern kbd_ioq
 
 func _start
@@ -18,6 +19,7 @@ func _start
     call idt_init
     call mem_init
     call thread_init
+    call tss_init
     
     thread_start(thread_a, "consumer_a", 31, " A_")
     thread_start(thread_b, "consumer_b", 31, " B_")

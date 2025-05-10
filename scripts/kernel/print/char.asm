@@ -1,11 +1,11 @@
 %include "include/stdlib.inc"
 
 [bits 32]
-SELECTOR_VIDEO equ (0x03 << 3) | 0 | 0
+SELECTOR_K_VIDEO equ (0x03 << 3) | 0 | 0
 
 section .data
-    global char_attr
-    char_attr db 00001111b
+    global CHAR_ATTR
+    CHAR_ATTR db 00001111b
 
 ;-------------------------------------------------------------------------------
 ; 函数名: put_char
@@ -28,7 +28,7 @@ func_lib put_char
     mov bx, ax
 
     ; 初始化es为显存段选择子
-    mov ax, SELECTOR_VIDEO
+    mov ax, SELECTOR_K_VIDEO
     mov es, ax
 
     ; 打印字符至对应显存单元
@@ -40,7 +40,7 @@ func_lib put_char
     je ascii_LF
 
     call need_roll
-    mov dh, [char_attr]
+    mov dh, [CHAR_ATTR]
     mov dl, ascii
 
     mov word [es:bx], dx

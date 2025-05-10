@@ -1,7 +1,7 @@
 %include "include/builtin.inc"
 
 [bits 32]
-SELECTOR_VIDEO equ (0x03 << 3) | 0 | 0
+SELECTOR_K_VIDEO equ (0x03 << 3) | 0 | 0
 
 ;-------------------------------------------------------------------------------
 ; 函数名: roll_screen
@@ -13,7 +13,7 @@ SELECTOR_VIDEO equ (0x03 << 3) | 0 | 0
 func_lib roll_screen
     arg uint8_t, count
     
-    mov ax, SELECTOR_VIDEO
+    mov ax, SELECTOR_K_VIDEO
     mov es, ax
 
     roll_loop:
